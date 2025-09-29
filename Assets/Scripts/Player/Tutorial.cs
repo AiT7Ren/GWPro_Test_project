@@ -31,6 +31,11 @@ public class Tutorial : MonoBehaviour
         Init();
     }
 
+    public void SetText(Transform text)
+    {
+        _tuturialText=text.GetComponent<TextMeshProUGUI>();
+        _tuturialText.text = TutorialSteps[i].WhatNeewToDo;
+    }
     private void Init()
     {
        
@@ -92,7 +97,7 @@ public class Tutorial : MonoBehaviour
             if (!isFirst) TutorialSteps[i].active = false;
             i++;
             TutorialSteps[i].active = true;
-            _tuturialText.text = TutorialSteps[i].WhatNeewToDo;
+            if(_tuturialText!=null)_tuturialText.text = TutorialSteps[i].WhatNeewToDo;
         }
         
     }

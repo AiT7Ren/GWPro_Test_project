@@ -1,8 +1,9 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using HTC.UnityPlugin.Vive;
 
-public class VRTestController : MonoBehaviour
+public class VRTestPlayerController : MonoBehaviour, IPlayerControllerIniter
 {
     //Я с VR не работал, так что буду писать что я хочу получить от контроллера
     //потестить возможноти нет 
@@ -16,25 +17,69 @@ public class VRTestController : MonoBehaviour
     [SerializeField]private LayerMask _groundMask;
     private RaycastHit _lHit;
     private RaycastHit _rHit;
-    private RaycastHit[] nonAllocatedHits = new RaycastHit[3];
+    private RaycastHit[] _nonAllocatedHits = new RaycastHit[3];
     private IInteractible _lUseble;
     private IInteractible _rUseble;
 
     private bool _lHold;
     private bool _rHold;
     
-    private Camera _mCam; 
-    private VivePoseTracker _poseTracker;
-    
-    [SerializeField] Inventory _inventory;
-
-    private void Start()
+    private bool _lRayHit;
+    private bool _rRayHit;
+    private Camera _mCam;
+    private Transform _playerRoot;
+    private Inventory _inventory;
+   // [SerializeField] private List<VivePoseTracker> _trakers;
+    public void Init(Camera cam, Transform playerRoot, Inventory inventory = null)
     {
-        _mCam = Camera.main;
-        _mCam.transform.parent = null;
-        _poseTracker = _mCam.GetComponent<VivePoseTracker>(); //как я понял он работает автоматически
-        _poseTracker.posOffset=new Vector3(0, 1.6f, 0); //
+        _mCam = cam;
+        _playerRoot=playerRoot;
+        _inventory = inventory;
+       // if(_trakers==null)_trakers=new List<VivePoseTracker>(); 
+        CamSetup(cam.transform);
     }
+
+    private void CamSetup(Transform cam)
+    {
+        if (cam == null)throw new Exception("No camera set");
+        cam.parent = this.transform;
+        cam.localPosition = new Vector3(0, 1.6f, 0);
+        VivePoseTracker cameraPoseTracker = cam.gameObject.AddComponent<VivePoseTracker>();
+        cameraPoseTracker.viveRole.SetEx(ViveRoleProperty.New(DeviceRole.Hmd));
+        cameraPoseTracker.origin = transform;
+        
+        //if(_trakers.Count>0)_trakers.Add(cameraPoseTracker);
+        //PoserOrigionSetup();
+        MainBodyPhysicsSetup();
+    }
+
+    private void MainBodyPhysicsSetup()
+    {
+       CapsuleCollider playerCol=_playerRoot.gameObject.AddComponent<CapsuleCollider>();
+       playerCol.radius = 0.4f;
+       playerCol.height = 1.7f;
+       playerCol.center = new Vector3(0, playerCol.height/2f, 0);
+       Rigidbody rb=_playerRoot.gameObject.AddComponent<Rigidbody>();
+       rb.constraints = RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionZ | RigidbodyConstraints.FreezeRotation;
+    }
+
+    #region hidden_not_use
+    //думаю пока это не надо если использовать готовый риг 
+    /*private void PoserOrigionSetup()
+    {
+        if (_trakers.Count<=1)
+        {
+            var trakers = GetComponentsInChildren<VivePoseTracker>();
+            _trakers.AddRange(trakers);
+        }
+        foreach (var traker in _trakers)
+        {
+            traker.origin = _playerRoot;
+        }
+    }*/
+    #endregion
+    
+    
 
     private void Update()
     {
@@ -50,15 +95,14 @@ public class VRTestController : MonoBehaviour
     private void TryTeleport()
     {
         Ray lRay = new Ray(_lControllerPos,_lControllerRot*Vector3.forward); //телепорт с проверкой,
-                                                                                         //но я все ещё не понимаю что делать с камерой и другими контроллерами
-                                                                                         //вероятно должен быть какой то рутовый объект и его и надо двигать 
         if (Physics.Raycast(lRay, out RaycastHit hit, 10f, _groundMask))
         {
-            int hitsNumber = Physics.SphereCastNonAlloc(hit.point, 0.25f, Vector3.up, nonAllocatedHits, 2f);
+            int hitsNumber = Physics.SphereCastNonAlloc(hit.point, 0.25f, Vector3.up, _nonAllocatedHits, 2f);
             if (hitsNumber == 0)
             {
-                transform.position = hit.point;
-                _poseTracker.transform.position = hit.point;   //ну допустим камера под винится а вот что с контроллерами
+                Vector3 offset = hit.point - _mCam.transform.position;
+                offset.y = hit.point.y - _playerRoot.position.y;
+                _playerRoot.position += offset;
             }
         }
     }
@@ -96,7 +140,8 @@ public class VRTestController : MonoBehaviour
     private void LeftUse() //вот тут думаю будет ошибка 
     {
         
-        if (_lUseble == null||((_inventory==null)&&(!_inventory.IsProbsPlace&&_inventory.ItemFromLeftHand==null))) return; //без обьекта для использования или нельзя зайти в ReturnPropsObjTo то выходим
+        if (_lUseble == null || _inventory == null) return;
+        if (!_inventory.IsProbsPlace && _inventory.ItemFromLeftHand == null) return;
         if (_lUseble is RemoteButton button) //проверяем что это кнопка
         {
             if (button.ButtonType == RemoteButton.ButtonState.Hold) _lHold = true; //если это кнопка с зажимом зажимаем
@@ -152,24 +197,55 @@ public class VRTestController : MonoBehaviour
     }
     private void Caster()
     {
-        Ray lRay = new Ray(_lControllerPos,_lControllerRot*Vector3.forward); //должен получится луч из контроллера по локальной Z
-        if (Physics.Raycast(lRay, out RaycastHit lhit, 3f, _useMask))
+        // Левый контроллер
+        Ray lRay = new Ray(_lControllerPos, _lControllerRot * Vector3.forward);
+        bool leftHit = Physics.Raycast(lRay, out RaycastHit lhit, 3f, _useMask);
+    
+        if (leftHit)
         {
-            if(_lHit.collider!=lhit.collider)SetNewLRayCast(lhit);
+            if (!_lRayHit || _lHit.collider != lhit.collider)
+            {
+                SetNewLRayCast(lhit);
+            }
+            _lRayHit = true;
         }
-        Ray rRay = new Ray(_rControllerPos,_rControllerRot*Vector3.forward);
-        if (Physics.Raycast(rRay, out RaycastHit rhit, 3f, _useMask))
+        else
         {
-            if(_rHit.collider!=lhit.collider)SetNewRRayCast(lhit);
+            if (_lRayHit)
+            {
+                ClearLeftTarget();
+            }
+            _lRayHit = false;
         }
-        
+    
+        // Правый контроллер
+        Ray rRay = new Ray(_rControllerPos, _rControllerRot * Vector3.forward);
+        bool rightHit = Physics.Raycast(rRay, out RaycastHit rhit, 3f, _useMask);
+    
+        if (rightHit)
+        {
+            if (!_rRayHit || _rHit.collider != rhit.collider)
+            {
+                SetNewRRayCast(rhit);
+            }
+            _rRayHit = true;
+        }
+        else
+        {
+            if (_rRayHit)
+            {
+                ClearRightTarget();
+            }
+            _rRayHit = false;
+        }
     }
+    
     private void SetNewLRayCast(RaycastHit hit)
     {
         if (_lHold)
         {
             _lHold = false;
-            StopUse(_rUseble);
+            StopUse(_lUseble);
         }
         _lHit = hit;
         _lUseble = _lHit.collider.TryGetComponent(out IInteractible useble) ? useble : null;
@@ -190,7 +266,24 @@ public class VRTestController : MonoBehaviour
         (_useble as RemoteButton)?.StopUse();
     }
     
-    
-    
+    private void ClearLeftTarget()
+    {
+        if (_lHold)
+        {
+            _lHold = false;
+            StopUse(_lUseble);
+        }
+        _lUseble = null;
+    }
+
+    private void ClearRightTarget()
+    {
+        if (_rHold)
+        {
+            _rHold = false;
+            StopUse(_rUseble);
+        }
+        _rUseble = null;
+    }
     
 }

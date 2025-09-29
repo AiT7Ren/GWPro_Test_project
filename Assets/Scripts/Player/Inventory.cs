@@ -12,15 +12,18 @@ public class Inventory : MonoBehaviour
     public void EqipToRightHand(GameObject item)
     {
         if (item != null) ItemFromRightHand = ItemAttendTo(item, _rHand);
+        if(IsNotHaveInstance())return; 
         Tutorial.Instance.TutorialSteps[0].waitForPlayerAction=true;
     }
 
+    
     public void EqipToLeftHand(GameObject item)
     {
         if (item != null)
         {
             ItemFromLeftHand = ItemAttendTo(item, _lHand);
             IsProbsPlace = false;
+            if(IsNotHaveInstance())return;
             Tutorial.Instance.TutorialSteps[1].waitForPlayerAction=true;
         }
     }
@@ -33,13 +36,14 @@ public class Inventory : MonoBehaviour
 
     public void ReleasePropsObjTo(Vector3 position)
     {
-        Debug.Log($"{ItemFromLeftHand.name} - {IsProbsPlace}");
         if(ItemFromLeftHand==null) return;
+        Debug.Log($"{ItemFromLeftHand.name} - {IsProbsPlace}");
         if(IsProbsPlace) return;
         _wire.gameObject.SetActive(true);
         ItemFromLeftHand.transform.parent = null; 
         ItemFromLeftHand.transform.position = position;
         IsProbsPlace = true;
+        if (IsNotHaveInstance()) return;
         if(Tutorial.Instance.TutorialSteps[5].active)Tutorial.Instance.TutorialSteps[5].waitForPlayerAction = true;
     }
     public void ReturnPropsObjTo()
@@ -49,6 +53,7 @@ public class Inventory : MonoBehaviour
         _wire.gameObject.SetActive(false);
         var nn = ItemAttendTo(ItemFromLeftHand, _lHand);
         IsProbsPlace = false;
+        if (IsNotHaveInstance()) return;
         if(Tutorial.Instance.TutorialSteps[6].active)Tutorial.Instance.TutorialSteps[6].waitForPlayerAction = true;
     }
 
@@ -59,4 +64,9 @@ public class Inventory : MonoBehaviour
         item.transform.localRotation = Quaternion.identity;
         return item;
     }
+    private bool IsNotHaveInstance()
+    {
+        return Tutorial.Instance == null;
+    }
+    
 }

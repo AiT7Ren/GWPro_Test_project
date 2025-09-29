@@ -1,6 +1,7 @@
+using System;
 using UnityEngine;
 
-public class NoneViveTestController : MonoBehaviour
+public class NoneViveTestController : MonoBehaviour,IPlayerControllerIniter
 {
     [SerializeField] private bool _VRControlImitation;
     private CharacterController _cc;
@@ -9,7 +10,8 @@ public class NoneViveTestController : MonoBehaviour
     private Vector3 _moveDir;
     [SerializeField] private float _moveSpeed;
     [SerializeField] private float _mouseSpeed;
-    private Transform _camHolder;
+    [SerializeField]private Transform _camHolder;
+    private Transform _playerRoot;
     private Camera _mCam;
     private float _pitch;
     private float _yaw;
@@ -28,6 +30,7 @@ public class NoneViveTestController : MonoBehaviour
 
     private Vector3 hitPos;
     [SerializeField]private float _rayDistance=2.5f;
+    [SerializeField] private Transform _tutorialText;
 #if UNITY_EDITOR
     private void OnValidate()
     {
@@ -49,15 +52,28 @@ public class NoneViveTestController : MonoBehaviour
             _aimHelper.gameObject.SetActive(true);
         }
     }
-
-    private void Start()
+    
+    public void Init(Camera cam,Transform playerRoot,Inventory inventory=null)
     {
-        _cc = GetComponent<CharacterController>();
-        _camHolder = transform.GetChild(0).transform;
-        //  _mCam = _camHolder.GetComponentInChildren<Camera>();
-        _mCam = Camera.main;
+        _inventory = inventory;
+        _playerRoot = playerRoot;
+        _mCam = cam;
+        _cc = _playerRoot.gameObject.AddComponent<CharacterController>();
+        CCSettings();
+        if (_camHolder == null) _camHolder = transform.GetChild(0).transform;
+        cam.transform.parent = _camHolder;
+        cam.transform.localPosition = Vector3.zero;
         _pitch = _camHolder.localRotation.eulerAngles.x;
         _yaw = transform.rotation.eulerAngles.y;
+        if (Tutorial.Instance != null)Tutorial.Instance.SetText(_tutorialText);
+    }
+
+    void CCSettings()
+    {
+        if(_cc==null) throw new Exception($"character controller not found in NoneViveTestController");
+        _cc.radius = 0.4f;
+        _cc.height = 1.8f;
+        _cc.center = new Vector3(0,_cc.height/2f, 0);
     }
 
     private void Update()
@@ -96,7 +112,6 @@ public class NoneViveTestController : MonoBehaviour
         {
             if (hit.collider.TryGetComponent(out IInteractible useble))
             {
-               // Debug.Log(hit.collider.name);
                 if (_useble is TestPlase testPlase)
                 {
                     hitPos=hit.point;
@@ -141,19 +156,16 @@ public class NoneViveTestController : MonoBehaviour
         if (_mouseInput.sqrMagnitude < ZERO_FOR_INPUT) return;
         _yaw = Clamper(_yaw + _mouseInput.x);
         _pitch = Clamper(_pitch - _mouseInput.y, -Y_CAM_LIMIT, Y_CAM_LIMIT);
-        transform.rotation = Quaternion.Euler(0, _yaw, 0);
+        _playerRoot.rotation = Quaternion.Euler(0, _yaw, 0);
         _camHolder.localRotation = Quaternion.Euler(_pitch, 0, 0);
     }
 
     private float Clamper(float current, float min = 0, float max = 0)
     {
-        if (min == 0 && max == 0)
-        {
-            if (current > 360f) current -= 360f;
-            if (current < -360f) current += 360f;
-            return current;
-        }
-        return Mathf.Clamp(current, min, max);
+        if (min != 0 || max != 0) return Mathf.Clamp(current, min, max);
+        if (current > 360f) current -= 360f;
+        if (current < -360f) current += 360f;
+        return current;
     }
 
     private void Move()
@@ -164,8 +176,9 @@ public class NoneViveTestController : MonoBehaviour
             return;
         }
 
-        _moveDir = transform.forward * _moveInput.y + transform.right * _moveInput.x;
-        _cc.Move(_moveDir.normalized * _moveSpeed * Time.deltaTime);
+        _moveDir = _playerRoot.forward * _moveInput.y + _playerRoot.right * _moveInput.x;
+        _moveDir=_moveDir.normalized *Time.deltaTime;
+        _cc.Move(_moveDir * _moveSpeed);
     }
 
     private void InputRead()
@@ -196,21 +209,10 @@ public class NoneViveTestController : MonoBehaviour
                 return;
             }
             if (_useble == null) return;
-            if (_useble is ItemPickUp pickup)
-            {
-                if (pickup.ItemToHad == ItemPickUp.ItemHand.Left)
-                {
-                    if (pickup.ItemToHad == ItemPickUp.ItemHand.Right)
-                        _inventory.EqipToRightHand(pickup.gameObject);
-                    else _inventory.EqipToLeftHand(pickup.gameObject);
-                    pickup.Use();
-                }
-            }
-            if (_useble is TestPlase place)
-            {
-                Debug.Log("Try use placer");
-                _inventory.ReleasePropsObjTo(hitPos);
-            }
+            if(_useble is ItemPickUp pickUp)PickUp(pickUp);
+            if (_useble is not TestPlase place) return;
+            Debug.Log("Try use placer");
+            _inventory.ReleasePropsObjTo(hitPos);
         }
         
     }
@@ -226,10 +228,6 @@ public class NoneViveTestController : MonoBehaviour
     {
         if (_useble == null) StopUse();
         _useble = useble;
-        if (_inventory == null)
-        {
-        }
-
         UpdateUseIcon(_useble);
     }
 
@@ -242,13 +240,22 @@ public class NoneViveTestController : MonoBehaviour
             else button.Use();
             return;
         }
-        if (_inventory != null)
-            if (_useble is ItemPickUp pickup)
-            {
-                if (pickup.ItemToHad == ItemPickUp.ItemHand.Right)
-                    _inventory.EqipToRightHand(pickup.gameObject);
-                else _inventory.EqipToLeftHand(pickup.gameObject);
-                pickup.Use();
-            }
+        if (_inventory == null) return;
+        if(_useble is ItemPickUp pickUp)PickUp(pickUp);
     }
+
+    void PickUp(ItemPickUp pickup)
+    {
+        if (_itemController == null)
+        {
+            _inventory.TryGetComponent(out GazAnalyzerController gazController);
+            _itemController = gazController;
+            if(_itemController != null) throw new Exception("Pickup controller could not be found in VRTestController");
+        }
+        if (pickup.ItemToHad == ItemPickUp.ItemHand.Right) _inventory.EqipToRightHand(pickup.gameObject);
+        else _inventory.EqipToLeftHand(pickup.gameObject);
+        pickup.Use();
+    }
+    
+    
 }
