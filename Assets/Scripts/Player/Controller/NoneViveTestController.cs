@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-public class NoneViveTestController : MonoBehaviour,IPlayerControllerIniter
+public class NoneViveTestController : MonoBehaviour, IPlayerControllerIniter, IUseCallBack
 {
     [SerializeField] private bool _VRControlImitation;
     private CharacterController _cc;
@@ -10,27 +10,24 @@ public class NoneViveTestController : MonoBehaviour,IPlayerControllerIniter
     private Vector3 _moveDir;
     [SerializeField] private float _moveSpeed;
     [SerializeField] private float _mouseSpeed;
-    [SerializeField]private Transform _camHolder;
+    [SerializeField] private Transform _camHolder;
     private Transform _playerRoot;
     private Camera _mCam;
     private float _pitch;
     private float _yaw;
-    private IInteractible _useble;
+    private IInteractible _interactible;
     [SerializeField] private LayerMask _mask;
-    [SerializeField] private Transform _usePromt;
     [SerializeField] private Transform _aimHelper;
-    [SerializeField] private Transform _holdPromt;
-    [SerializeField] private Transform _pickUpLPromt;
-    [SerializeField] private Transform _pickUpRPromt;
     private const float ZERO_FOR_INPUT = 0.001f;
     private const float Y_CAM_LIMIT = 89f;
     private bool _buttonHolding;
     [SerializeField] private GazAnalyzerController _itemController;
     [SerializeField] private Inventory _inventory;
 
-    private Vector3 hitPos;
-    [SerializeField]private float _rayDistance=2.5f;
+    private Vector3? _hitPos;
+    [SerializeField] private float _rayDistance = 2.5f;
     [SerializeField] private Transform _tutorialText;
+    private СontextHints _contextHints;
 #if UNITY_EDITOR
     private void OnValidate()
     {
@@ -52,12 +49,13 @@ public class NoneViveTestController : MonoBehaviour,IPlayerControllerIniter
             _aimHelper.gameObject.SetActive(true);
         }
     }
-    
-    public void Init(Camera cam,Transform playerRoot,Inventory inventory=null)
+
+    public void Init(Camera cam, Transform playerRoot, Inventory inventory = null,СontextHints contextHints = null)
     {
         _inventory = inventory;
         _playerRoot = playerRoot;
         _mCam = cam;
+        _contextHints= contextHints;
         _cc = _playerRoot.gameObject.AddComponent<CharacterController>();
         CCSettings();
         if (_camHolder == null) _camHolder = transform.GetChild(0).transform;
@@ -69,17 +67,17 @@ public class NoneViveTestController : MonoBehaviour,IPlayerControllerIniter
 
     void CCSettings()
     {
-        if(_cc==null) throw new Exception($"character controller not found in NoneViveTestController");
+        if (_cc == null) throw new Exception($"character controller not found in NoneViveTestController");
         _cc.radius = 0.4f;
         _cc.height = 1.8f;
-        _cc.center = new Vector3(0,_cc.height/2f, 0);
+        _cc.center = new Vector3(0, _cc.height / 2f, 0);
     }
 
     private void Update()
     {
         InputRead();
         Move();
-        if (_buttonHolding) _useble?.Use();
+        if (_buttonHolding)_interactible?.Use();
     }
 
     private void LateUpdate()
@@ -107,49 +105,15 @@ public class NoneViveTestController : MonoBehaviour,IPlayerControllerIniter
 
     private void ShootTest(Ray ray)
     {
+        _hitPos = null;
+        IInteractible newInteractible = null;
         if (Physics.Raycast(ray, out var hit, _rayDistance, _mask))
         {
-            if (hit.collider.TryGetComponent(out IInteractible useble))
-            {
-                if (_useble is TestPlase testPlase)
-                {
-                    hitPos=hit.point;
-                }
-                if (_useble != useble) SetNewUseble(useble);
-                return;
-            }
-            else
-            {
-                SetNewUseble(null);
-                return;
-            }
+            newInteractible = hit.collider.gameObject.GetComponent<IInteractible>();
+            if(newInteractible.GetInteractiveType()==IteractibleType.Place)_hitPos=hit.point;
         }
-        else SetNewUseble(null);
-        
+        if (_interactible != newInteractible) SetNewUseble(newInteractible);
     }
-
-    private void UpdateUseIcon(IInteractible useble)
-    {
-        _usePromt.gameObject.SetActive(false);
-        _holdPromt.gameObject.SetActive(false);
-        _pickUpLPromt.gameObject.SetActive(false);
-        _pickUpRPromt.gameObject.SetActive(false);
-        if (useble == null) return;
-        if (useble is RemoteButton button)
-        {
-            if (button.ButtonType == RemoteButton.ButtonState.Hold) _holdPromt.gameObject.SetActive(true);
-            else _usePromt?.gameObject.SetActive(true);
-            return;
-        }
-
-        if (_inventory != null)
-            if (useble is ItemPickUp pickup)
-            {
-                if (pickup.ItemToHad == ItemPickUp.ItemHand.Left) _pickUpLPromt.gameObject.SetActive(true);
-                else _pickUpRPromt.gameObject.SetActive(true);
-            }
-    }
-
     private void Rotate()
     {
         if (_mouseInput.sqrMagnitude < ZERO_FOR_INPUT) return;
@@ -174,9 +138,8 @@ public class NoneViveTestController : MonoBehaviour,IPlayerControllerIniter
             _cc.Move(Vector3.zero);
             return;
         }
-
         _moveDir = _playerRoot.forward * _moveInput.y + _playerRoot.right * _moveInput.x;
-        _moveDir=_moveDir.normalized *Time.deltaTime;
+        _moveDir = _moveDir.normalized * Time.deltaTime;
         _cc.Move(_moveDir * _moveSpeed);
     }
 
@@ -184,7 +147,7 @@ public class NoneViveTestController : MonoBehaviour,IPlayerControllerIniter
     {
         _moveInput.Set(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
         _mouseInput.Set(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
-        if (Input.GetKeyDown(KeyCode.E)) TryUse();
+        if (Input.GetKeyDown(KeyCode.E)) TryUseRight();
         if (Input.GetKeyDown(KeyCode.Q)) TryUseLeft();
         if (Input.GetKeyUp(KeyCode.E)) StopUse();
         if (!_VRControlImitation && _itemController != null)
@@ -198,63 +161,44 @@ public class NoneViveTestController : MonoBehaviour,IPlayerControllerIniter
 
     private void TryUseLeft()
     {
-        Debug.Log("Try use left");
         if (_inventory != null)
         {
-            if (_inventory.IsProbsPlace&&_inventory.ItemFromLeftHand!=null)
-            {
-                Debug.Log("Try return");
-                _inventory.ReturnPropsObjTo();
-                return;
-            }
-            if (_useble == null) return;
-            if(_useble is ItemPickUp pickUp)PickUp(pickUp);
-            if (_useble is not TestPlase place) return;
-            Debug.Log("Try use placer");
-            _inventory.ReleasePropsObjTo(hitPos);
+            if(!_inventory.IfItemOnHand(isLeft:true)&&_inventory.HaveObject(isLeft:true))_inventory.ReturnPropsObjTo();
+            if(_inventory.IfItemOnHand(isLeft:true)&&_inventory.HaveObject(isLeft:true)&&_hitPos!=null)_inventory.ReleasePropsObjTo(_hitPos.Value);
+            if (_interactible == null) return;
+            _interactible?.Use(this);
         }
-        
     }
-
     private void StopUse()
     {
-        if (!_buttonHolding) return;
-        (_useble as RemoteButton)?.StopUse();
-        _buttonHolding = false;
+        _buttonHolding = false; 
+        (_interactible as RemoteButton)?.StopUse();
     }
 
     private void SetNewUseble(IInteractible useble)
     {
-        if (_useble == null) StopUse();
-        _useble = useble;
-        UpdateUseIcon(_useble);
+        if (_buttonHolding) StopUse();
+        _interactible = useble;
+        
+        if(_interactible==null)_contextHints.SetNewHint(null);
+        else _contextHints.SetNewHint(_interactible.GetInteractiveType());
     }
 
-    private void TryUse()
+    private void TryUseRight()
     {
-        if (_useble == null) return;
-        if (_useble is RemoteButton button)
-        {
-            if (button.ButtonType == RemoteButton.ButtonState.Hold) _buttonHolding = true;
-            else button.Use();
-            return;
-        }
-        if (_inventory == null) return;
-        if(_useble is ItemPickUp pickUp)PickUp(pickUp);
+        if (_interactible == null) return;
+        _interactible.Use(this);
     }
 
-    void PickUp(ItemPickUp pickup)
+    public void IsHoldCallback(bool set)
     {
-        if (_itemController == null)
-        {
-            _inventory.TryGetComponent(out GazAnalyzerController gazController);
-            _itemController = gazController;
-            if(_itemController != null) throw new Exception("Pickup controller could not be found in VRTestController");
-        }
-        if (pickup.ItemToHad == ItemPickUp.ItemHand.Right) _inventory.EqipToRightHand(pickup.gameObject);
-        else _inventory.EqipToLeftHand(pickup.gameObject);
-        pickup.Use();
+        _buttonHolding = set;
     }
-    
-    
+    public void IsToInventoryCallBack(bool leftHand)
+    {
+        if(_interactible.GetInteractiveType()!=IteractibleType.PickUp) return; 
+        if (_interactible is not ItemPickUp item) return;
+        if(leftHand)_inventory.EqipToLeftHand(item.gameObject);
+        else _inventory.EqipToRightHand(item.gameObject);
+    }
 }

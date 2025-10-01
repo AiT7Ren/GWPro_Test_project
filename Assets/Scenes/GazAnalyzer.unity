@@ -1562,7 +1562,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _arrowPreFab: {fileID: 5264121324423915897, guid: 805413e4cfb9b544bb3857536311fd5d, type: 3}
   _isComplited: 0
-  _tuturialText: {fileID: 0}
+  _tuturialText: {fileID: 1410559034}
   TutorialSteps:
   - active: 0
     WhatNeewToDo: 
@@ -1725,6 +1725,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 7504147706786645974, guid: cb28b28840ae2564f9db0e09251f865d, type: 3}
   m_PrefabInstance: {fileID: 3673241689066501914}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1410559034 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4269606058136389725, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+  m_PrefabInstance: {fileID: 6469821416022717997}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!4 &1448570620 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2745591004657693062, guid: cb28b28840ae2564f9db0e09251f865d, type: 3}
@@ -1799,10 +1810,10 @@ MonoBehaviour:
   MaterialPhases:
   - PhaseBaseColor: {r: 0.25882354, g: 0.27058825, b: 0.2784314, a: 0}
     PhaseOutlinePower: 0.03
-    PhaseOutlineEmmision: 10
+    PhaseOutlineEmmision: 5
   - PhaseBaseColor: {r: 0.15622401, g: 1, b: 0, a: 0}
-    PhaseOutlinePower: 0
-    PhaseOutlineEmmision: 0
+    PhaseOutlinePower: 0.01
+    PhaseOutlineEmmision: 3
 --- !u!1 &1473751363
 GameObject:
   m_ObjectHideFlags: 0
@@ -3384,6 +3395,26 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayarMainController
       objectReference: {fileID: 0}
+    - target: {fileID: 2819518899189180821, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_text
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 2819518899189180821, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_VerticalAlignment
+      value: 512
+      objectReference: {fileID: 0}
+    - target: {fileID: 2819518899189180821, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4269606058136389725, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_VerticalAlignment
+      value: 512
+      objectReference: {fileID: 0}
+    - target: {fileID: 4269606058136389725, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_HorizontalAlignment
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 4625304572366012800, guid: c1539f38d115f014a869680a07372a9b, type: 3}
       propertyPath: _wire
       value: 
@@ -3867,6 +3898,10 @@ PrefabInstance:
     - target: {fileID: 5704921682439440301, guid: d7ea5af8239e56d4c8713058bbaf6139, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8220564503508789308, guid: d7ea5af8239e56d4c8713058bbaf6139, type: 3}
+      propertyPath: _used.a
+      value: 0.6509804
       objectReference: {fileID: 0}
     - target: {fileID: 8220564503508789308, guid: d7ea5af8239e56d4c8713058bbaf6139, type: 3}
       propertyPath: _airCollector

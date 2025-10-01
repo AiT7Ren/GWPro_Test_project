@@ -1,6 +1,14 @@
 public interface IInteractible
 {
-    //добавил этот интерфейс для кастов, но уже к концу разработке 2 сцены 
-    //надо отрефакторить как минимум надо поменять нейминги
-    void Use();
+    
+    void Use(IUseCallBack useCallBack=null);
+    IteractibleType GetInteractiveType();
+}
+
+public enum IteractibleType
+{
+    ClickButton,
+    HoldButton,
+    PickUp,
+    Place
 }

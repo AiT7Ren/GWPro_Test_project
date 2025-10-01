@@ -13,6 +13,7 @@ public class SimpleController : MonoBehaviour
     private IPlayerControllerIniter _playerControllerIniter;
     [SerializeField]private Inventory _inventoryHolder;
     [SerializeField]private Camera _mainCamera;
+    [SerializeField]private СontextHints _controllerHints;
     public enum ControllerType
     {
         NotVRTest,
@@ -27,6 +28,6 @@ public class SimpleController : MonoBehaviour
             _ => _playerControllerIniter
         };
         if(_playerControllerIniter==null)throw new Exception("PlayerControllerIniter is null");
-        _playerControllerIniter?.Init(_mainCamera,this.transform,_inventoryHolder);
+        _playerControllerIniter?.Init(_mainCamera,this.transform,_inventoryHolder,_controllerHints);
     }
 }

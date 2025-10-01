@@ -40,6 +40,7 @@ public class TutorialObjectOutline : MonoBehaviour
                 _multyMaterials[i] = _multyObject[i].gameObject.GetComponent<Renderer>().material;
                 if(_multyMaterials[i]==null)throw new Exception($"no multi Material  found in{gameObject.name}");
             }
+            _buttonAnimationCoroutine = StartCoroutine(ButtonAnimation());
             return;
         }
         if (_material == null)

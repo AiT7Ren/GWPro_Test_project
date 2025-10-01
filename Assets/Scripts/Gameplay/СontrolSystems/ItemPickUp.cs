@@ -22,11 +22,17 @@ public class ItemPickUp : MonoBehaviour,IInteractible
     } 
     public ItemHand ItemToHad = ItemHand.Left;
     
-    public void Use()
+    public void Use(IUseCallBack useCallBack=null)
     {
         if(!_isPicked)PickUp();
-        else Drop();
+        useCallBack?.IsToInventoryCallBack(ItemToHad==ItemHand.Left);
     }
+
+    public IteractibleType GetInteractiveType()
+    {
+        return IteractibleType.PickUp;
+    }
+
     private void PickUp()
     {
         gameObject.layer = 3;

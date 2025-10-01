@@ -30,7 +30,7 @@ public class VRTestPlayerController : MonoBehaviour, IPlayerControllerIniter
     private Transform _playerRoot;
     private Inventory _inventory;
    // [SerializeField] private List<VivePoseTracker> _trakers;
-    public void Init(Camera cam, Transform playerRoot, Inventory inventory = null)
+    public void Init(Camera cam, Transform playerRoot, Inventory inventory = null,СontextHints contextHints = null)
     {
         _mCam = cam;
         _playerRoot=playerRoot;
@@ -141,7 +141,7 @@ public class VRTestPlayerController : MonoBehaviour, IPlayerControllerIniter
     {
         
         if (_lUseble == null || _inventory == null) return;
-        if (!_inventory.IsProbsPlace && _inventory.ItemFromLeftHand == null) return;
+       // if (!_inventory.IsProbsPlace && _inventory.ItemFromLeftHand == null) return;
         if (_lUseble is RemoteButton button) //проверяем что это кнопка
         {
             if (button.ButtonType == RemoteButton.ButtonState.Hold) _lHold = true; //если это кнопка с зажимом зажимаем
@@ -150,19 +150,19 @@ public class VRTestPlayerController : MonoBehaviour, IPlayerControllerIniter
         }
         if (_inventory != null) //проверка на инвентарь
         {
-            if (_inventory.IsProbsPlace&&_inventory.ItemFromLeftHand!=null) //если мы брали датчик и он не в руках
-            {
-                Debug.Log("Try return");
-                _inventory.ReturnPropsObjTo(); //возврат в руки
-                return;
-            }
+            // if (_inventory.IsProbsPlace&&_inventory.ItemFromLeftHand!=null) //если мы брали датчик и он не в руках
+            // {
+            //     Debug.Log("Try return");
+            //     _inventory.ReturnPropsObjTo(); //возврат в руки
+            //     return;
+            // }
             if (_lUseble is ItemPickUp pickup) //проверяем что объект можно поднять 
             {
                 if (pickup.ItemToHad == ItemPickUp.ItemHand.Left) // просто что об]ект для левой руки и добавляем в инвентарь
                     _inventory.EqipToLeftHand(pickup.gameObject); 
                 pickup.Use();
             }
-            if (_lUseble is TestPlase place) //проверка что место для тест датчика
+            if (_lUseble is InteractiblePlase place) //проверка что место для тест датчика
             {
                 Debug.Log("Try use placer");
                 _inventory.ReleasePropsObjTo(_lHit.point); //ставим датчик в место

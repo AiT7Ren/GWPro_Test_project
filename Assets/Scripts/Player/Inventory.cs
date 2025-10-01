@@ -8,11 +8,24 @@ public class Inventory : MonoBehaviour
     public UnityEvent OnPickProbs;
     public BoolUnityEvent OnProbsInHand;
     [SerializeField] private Transform _rHand;
-    public GameObject ItemFromRightHand;
+    [SerializeField]private GameObject ItemFromRightHand;
     [SerializeField] private Transform _lHand;
-    public GameObject ItemFromLeftHand;
+    [SerializeField]private GameObject ItemFromLeftHand;
     [SerializeField] private Transform _wire;
     public bool IsProbsPlace = false;
+    
+    public bool IfItemOnHand(bool isLeft)
+    {
+        if (isLeft) return _lHand.transform.childCount > 0; 
+        return _rHand.transform.childCount > 0;
+    }
+
+    public bool HaveObject(bool isLeft)
+    {
+        if(isLeft)return ItemFromLeftHand!=null;
+        return ItemFromRightHand!=null;
+    }
+
     public void EqipToRightHand(GameObject item)
     {
         if (item != null) ItemFromRightHand = ItemAttendTo(item, _rHand); 

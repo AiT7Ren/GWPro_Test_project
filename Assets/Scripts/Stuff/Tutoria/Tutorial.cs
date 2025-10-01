@@ -6,7 +6,6 @@ using UnityEngine;
 
 public class Tutorial : MonoBehaviour
 {
-    public static Tutorial Instance;
     [SerializeField] private GameObject _arrowPreFab;
     [SerializeField]private bool _isComplited=false;
     private GameObject _arrow;
@@ -23,8 +22,6 @@ public class Tutorial : MonoBehaviour
         [HideInInspector]public Action OnExit;
     }
     #endregion
-
-    
     public void SetGaz()
     {
         TutorialSteps[0].waitForPlayerAction = true;
@@ -68,17 +65,9 @@ public class Tutorial : MonoBehaviour
 
     private void Start()
     { 
-        if (Instance == null) Instance = this;
-        else throw new Exception("Tutorial Already Have");
         Init();
     }
-
-    public void SetText(Transform text)
-    {
-        _tuturialText=text.GetComponent<TextMeshProUGUI>();
-        TextUpdate();
-    }
-
+    
     private void TextUpdate()
     {
         if(_tuturialText==null) return;

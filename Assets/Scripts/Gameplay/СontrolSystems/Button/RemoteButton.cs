@@ -5,11 +5,11 @@ public class RemoteButton : MonoBehaviour,IUseble
 {
    public enum ButtonState
    {
-      CLick,
+      Click,
       Hold
    }
    public event Action<IUseble>OnUsed;
-   [SerializeField] public ButtonState ButtonType = ButtonState.CLick;
+   [SerializeField] public ButtonState ButtonType = ButtonState.Click;
    public bool IsActive{get;private set;}
    
    [SerializeField] private Color _used;
@@ -20,9 +20,9 @@ public class RemoteButton : MonoBehaviour,IUseble
       _material = GetComponent<Renderer>().material;
       SetUseColor();
    }
-   public void Use()
+   public void Use(IUseCallBack useCallBack=null)
    {
-      if (ButtonType == ButtonState.CLick)
+      if (ButtonType == ButtonState.Click)
       {
          IsActive = !IsActive; 
          OnUsed?.Invoke(this); 
@@ -30,9 +30,15 @@ public class RemoteButton : MonoBehaviour,IUseble
       }
       if (ButtonType == ButtonState.Hold)
       {
+         useCallBack?.IsHoldCallback(true);
          IsActive = true;
          OnUsed?.Invoke(this);
       }
+   }
+
+   public IteractibleType GetInteractiveType()
+   {
+      return ButtonType == ButtonState.Click ? IteractibleType.ClickButton:IteractibleType.HoldButton;
    }
 
    public void StopUse()
