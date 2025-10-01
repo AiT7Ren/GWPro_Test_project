@@ -8,7 +8,7 @@ public class GazAnalyzerController : MonoBehaviour
 {
   public FloatUnityEvent OnSetProbsPower;
   
-  public UnityEvent OnOffState; //для разнообразия
+  public StringUnityEvent OnOffState;
   public StringUnityEvent OnOnState;
   public StringUnityEvent OnDangerState;
   public StringUnityEvent OnScaneState;
@@ -116,7 +116,7 @@ public class GazAnalyzerController : MonoBehaviour
     {
       _isPowerOn = false;
       if(_gazAnalyzIniter.GetPowerOnButton().IsActive)_gazAnalyzIniter.GetPowerOnButton().OffButton();
-      TryUseEvent(OnOffState);
+      TryUseEvent(OnOffState,GazStateName.OFF_STATE);
       return;
     }
 
@@ -131,8 +131,6 @@ public class GazAnalyzerController : MonoBehaviour
     if (_isInLeakDetection)
     {
       TryUseEvent(OnLeakFindState, GazStateName.LEAKDET_STATE);
-      if(IsNotHaveInstance())return;
-      if (Tutorial.Instance.TutorialSteps[4].active) Tutorial.Instance.TutorialSteps[4].waitForPlayerAction = true;
       return;
     }
     if (_isInDanger)
@@ -143,16 +141,10 @@ public class GazAnalyzerController : MonoBehaviour
 
     TryUseEvent(OnScaneState, GazStateName.SCANE_STATE);
   }
-
-  private void TryUseEvent(UnityEvent eventMetod)
-  {
-    Debug.Log($"WARNING Not hashMetod");
-    eventMetod?.Invoke();
-  }
-
+  
   private void TryUseEvent(StringUnityEvent eventMetod, string par)
   {
-    if(eventMetod.GetPersistentEventCount() > 0) eventMetod.Invoke(par);
+    if(eventMetod.GetPersistentEventCount() > 0) eventMetod?.Invoke(par);
     else
     {
       Debug.Log($"{par} used from code");
@@ -168,17 +160,11 @@ public class GazAnalyzerController : MonoBehaviour
     _isPowerOn = true;
     if(!_gazAnalyzIniter.GetPowerOnButton().IsActive)_gazAnalyzIniter.GetPowerOnButton().OnButton();
     GazBehaviour();
-    if(IsNotHaveInstance())return;
-    if (Tutorial.Instance.TutorialSteps[2].active) Tutorial.Instance.TutorialSteps[2].waitForPlayerAction = true;
   }
   private void DangerState(bool isActive)
   {
     _isInDanger = isActive;
     GazBehaviour();
-    if(IsNotHaveInstance())return;
-    if (Tutorial.Instance.TutorialSteps[3].active) Tutorial.Instance.TutorialSteps[3].waitForPlayerAction = _isInDanger;
-    if (Tutorial.Instance.TutorialSteps[7].active) Tutorial.Instance.TutorialSteps[7].waitForPlayerAction = !_isInDanger;
-    
   }
   private void TryOnorOff(float delta)
   {
@@ -215,10 +201,6 @@ public class GazAnalyzerController : MonoBehaviour
     if(_dangerZoneHolder!=null)_dangerZoneHolder.OnDangerZone -= DangerState;
     ButtonControllUnsub();
     _buttonSignalInpretator?.Dispose();
-  }
-  private bool IsNotHaveInstance()
-  {
-    return Tutorial.Instance == null;
   }
 }
 

@@ -1,8 +1,12 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using UnityEngine.Events;
+using Helpers;
 
 public class Inventory : MonoBehaviour
 {
+    public UnityEvent OnPickGaz;
+    public UnityEvent OnPickProbs;
+    public BoolUnityEvent OnProbsInHand;
     [SerializeField] private Transform _rHand;
     public GameObject ItemFromRightHand;
     [SerializeField] private Transform _lHand;
@@ -11,20 +15,16 @@ public class Inventory : MonoBehaviour
     public bool IsProbsPlace = false;
     public void EqipToRightHand(GameObject item)
     {
-        if (item != null) ItemFromRightHand = ItemAttendTo(item, _rHand);
-        if(IsNotHaveInstance())return; 
-        Tutorial.Instance.TutorialSteps[0].waitForPlayerAction=true;
+        if (item != null) ItemFromRightHand = ItemAttendTo(item, _rHand); 
+        OnPickGaz?.Invoke();
     }
-
-    
     public void EqipToLeftHand(GameObject item)
     {
         if (item != null)
         {
             ItemFromLeftHand = ItemAttendTo(item, _lHand);
             IsProbsPlace = false;
-            if(IsNotHaveInstance())return;
-            Tutorial.Instance.TutorialSteps[1].waitForPlayerAction=true;
+            OnPickProbs?.Invoke();
         }
     }
 
@@ -43,8 +43,8 @@ public class Inventory : MonoBehaviour
         ItemFromLeftHand.transform.parent = null; 
         ItemFromLeftHand.transform.position = position;
         IsProbsPlace = true;
-        if (IsNotHaveInstance()) return;
-        if(Tutorial.Instance.TutorialSteps[5].active)Tutorial.Instance.TutorialSteps[5].waitForPlayerAction = true;
+        OnProbsInHand?.Invoke(false);
+       
     }
     public void ReturnPropsObjTo()
     {
@@ -53,8 +53,7 @@ public class Inventory : MonoBehaviour
         _wire.gameObject.SetActive(false);
         var nn = ItemAttendTo(ItemFromLeftHand, _lHand);
         IsProbsPlace = false;
-        if (IsNotHaveInstance()) return;
-        if(Tutorial.Instance.TutorialSteps[6].active)Tutorial.Instance.TutorialSteps[6].waitForPlayerAction = true;
+        OnProbsInHand?.Invoke(true);
     }
 
     private GameObject ItemAttendTo(GameObject item, Transform hand)
@@ -64,9 +63,6 @@ public class Inventory : MonoBehaviour
         item.transform.localRotation = Quaternion.identity;
         return item;
     }
-    private bool IsNotHaveInstance()
-    {
-        return Tutorial.Instance == null;
-    }
+    
     
 }

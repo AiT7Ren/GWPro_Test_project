@@ -1,4 +1,4 @@
-Shader "Custom/TutorialShader"
+Shader "Custom/ForTutorial/OutLine"
 {
     Properties
     {
@@ -19,13 +19,11 @@ Shader "Custom/TutorialShader"
             "RenderType" = "Transparent"
         }
         LOD 200
+        
         Pass
         {
             Name "OUTLINE"
-            Tags
-            {
-                "LightMode" = "Always"
-            }
+            Tags { "LightMode" = "Always" }
 
             Cull Front
             ZTest Always
@@ -71,23 +69,22 @@ Shader "Custom/TutorialShader"
             }
             ENDCG
         }
+        
         Pass
         {
             Name "MAIN"
-            Tags
-            {
-                "LightMode" = "Always"
-            }
+            Tags { "LightMode" = "ForwardBase" }
 
             Cull Back
-            ZTest Always
-            ZWrite Off
+            ZTest LEqual
+            ZWrite On
             Blend SrcAlpha OneMinusSrcAlpha
 
             CGPROGRAM
             #pragma vertex vert
             #pragma fragment frag
             #include "UnityCG.cginc"
+            #include "Lighting.cginc"
 
             struct appdata
             {
@@ -123,72 +120,26 @@ Shader "Custom/TutorialShader"
                 return o;
             }
 
-            fixed4 frag(v2f i) : SV_Target
+            fixed4 frag(v2f i) : SV_TARGET
             {
+               
                 fixed4 col = tex2D(_MainTex, i.uv) * _Color;
+                
+
                 fixed4 emission = tex2D(_EmissionMap, i.uv_emission) * _EmissionColor;
                 emission.rgb *= _EmissionIntensity;
-                col.rgb += emission.rgb;
-                col.rgb += _EmissionColor.rgb * _EmissionIntensity * 0.1;
 
+                col.rgb += emission.rgb;
+                float3 lightDir = normalize(_WorldSpaceLightPos0.xyz);
+                float ndotl = saturate(dot(i.worldNormal, lightDir));
+                fixed3 lighting = ndotl * _LightColor0.rgb + UNITY_LIGHTMODEL_AMBIENT.rgb;
+                
+                col.rgb *= lighting;
+                
                 return col;
             }
             ENDCG
         }
-        Pass
-        {
-            Name "ADDITIVE_EMISSION"
-            Tags
-            {
-                "LightMode" = "Always"
-            }
-
-            Blend SrcAlpha One
-            ZTest Always
-            ZWrite Off
-            Cull Back
-
-            CGPROGRAM
-            #pragma vertex vert
-            #pragma fragment frag
-            #include "UnityCG.cginc"
-
-            struct appdata
-            {
-                float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
-            };
-
-            struct v2f
-            {
-                float2 uv : TEXCOORD0;
-                float4 vertex : SV_POSITION;
-            };
-
-            sampler2D _EmissionMap;
-            float4 _EmissionMap_ST;
-            fixed4 _EmissionColor;
-            float _EmissionIntensity;
-
-            v2f vert(appdata v)
-            {
-                v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = TRANSFORM_TEX(v.uv, _EmissionMap);
-                return o;
-            }
-
-            fixed4 frag(v2f i) : SV_Target
-            {
-                fixed4 emission = tex2D(_EmissionMap, i.uv) * _EmissionColor;
-                emission.rgb *= _EmissionIntensity * 0.5;
-                emission.a *= 0.3;
-                return emission;
-            }
-            ENDCG
-        }
     }
-
-    FallBack "Transparent/VertexLit"
-    CustomEditor "ShaderEditor.TutorialShader"
+    FallBack "Diffuse"
 }

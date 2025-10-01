@@ -65,7 +65,6 @@ public class NoneViveTestController : MonoBehaviour,IPlayerControllerIniter
         cam.transform.localPosition = Vector3.zero;
         _pitch = _camHolder.localRotation.eulerAngles.x;
         _yaw = transform.rotation.eulerAngles.y;
-        if (Tutorial.Instance != null)Tutorial.Instance.SetText(_tutorialText);
     }
 
     void CCSettings()

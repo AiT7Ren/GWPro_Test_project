@@ -7,16 +7,15 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: UI3dArrow
-  m_Shader: {fileID: 4800000, guid: 077a462f0727a9544985c7aac87c4985, type: 3}
+  m_Name: ButtonTutorialHelp
+  m_Shader: {fileID: 4800000, guid: e2a895d7f0cd26a4da8a6a4c35c410ad, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
-  m_InvalidKeywords:
-  - _USEMULTIPASSOUTLINE_ON
+  m_InvalidKeywords: []
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 1
+  m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
@@ -66,28 +65,23 @@ Material:
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
+    - _EmissionIntensity: 2.17
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
-    - _OutlineOffset: -0.009
-    - _OutlinePassCount: 1.44
-    - _OutlinePower: 0.1
-    - _OutlineSmoothness: 0.5
-    - _OutlineStep: 0.0123
-    - _OutlineWidth: 0.0015
-    - _OverlapThreshold: 0.1
+    - _OutlineIntensity: 0.82
+    - _OutlineWidth: 0.04
     - _Parallax: 0.02
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _UVSec: 0
-    - _UseMultiPassOutline: 1
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.18823531, g: 0.38823533, b: 0.227451, a: 1}
-    - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _OutlineColor: {r: 0.007843138, g: 0.015686275, b: 0.007843138, a: 1}
+    - _Color: {r: 0.15294118, g: 0.16862746, b: 0.18823531, a: 1}
+    - _EmissionColor: {r: 0.15294118, g: 0.16862746, b: 0.18823531, a: 0.003921569}
+    - _OutlineColor: {r: 0, g: 0.046749115, b: 1, a: 1}
   m_BuildTextureStacks: []
