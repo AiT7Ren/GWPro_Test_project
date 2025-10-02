@@ -1,37 +1,47 @@
 using System;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class NoneViveTestController : MonoBehaviour, IPlayerControllerIniter, IUseCallBack
 {
+    private const float Y_CAM_LIMIT = 89f;
+    
     [SerializeField] private bool _VRControlImitation;
-    private CharacterController _cc;
-    private Vector2 _mouseInput;
-    private Vector2 _moveInput;
-    private Vector3 _moveDir;
+    
     [SerializeField] private float _moveSpeed;
     [SerializeField] private float _mouseSpeed;
     [SerializeField] private Transform _camHolder;
     private Transform _playerRoot;
+    private CharacterController _cc;
+    private Vector3 _moveDir;
+    
     private Camera _mCam;
     private float _pitch;
     private float _yaw;
-    private IInteractible _interactible;
-    [SerializeField] private LayerMask _mask;
-    [SerializeField] private Transform _aimHelper;
-    private const float ZERO_FOR_INPUT = 0.001f;
-    private const float Y_CAM_LIMIT = 89f;
+    
     private bool _buttonHolding;
+    private IInteractible _interactible;
+    private Vector3? _hitPos;
+    
+    [SerializeField] private LayerMask _mask;
+    [SerializeField] private float _rayDistance = 2.5f;
+    
     [SerializeField] private GazAnalyzerController _itemController;
     [SerializeField] private Inventory _inventory;
-
-    private Vector3? _hitPos;
-    [SerializeField] private float _rayDistance = 2.5f;
-    [SerializeField] private Transform _tutorialText;
+    
     private СontextHints _contextHints;
+    [SerializeField] private bool _isNewInputSystem; 
+    private IInputSystem _inputSystem;
+    [SerializeField] private Transform _aimHelper;
+    private CustomCursore _cursore;
+    [SerializeField]private Texture2D _cursoreTexture;
+    
+    
 #if UNITY_EDITOR
     private void OnValidate()
     {
         OffOnCursore();
+        SetActiveInputSystem();
     }
 #endif
     private void OffOnCursore()
@@ -41,6 +51,7 @@ public class NoneViveTestController : MonoBehaviour, IPlayerControllerIniter, IU
             Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
             _aimHelper.gameObject.SetActive(false);
+            if (_cursore == null) _cursore = new CustomCursore(_cursoreTexture);
         }
         else
         {
@@ -49,7 +60,6 @@ public class NoneViveTestController : MonoBehaviour, IPlayerControllerIniter, IU
             _aimHelper.gameObject.SetActive(true);
         }
     }
-
     public void Init(Camera cam, Transform playerRoot, Inventory inventory = null,СontextHints contextHints = null)
     {
         _inventory = inventory;
@@ -63,46 +73,45 @@ public class NoneViveTestController : MonoBehaviour, IPlayerControllerIniter, IU
         cam.transform.localPosition = Vector3.zero;
         _pitch = _camHolder.localRotation.eulerAngles.x;
         _yaw = transform.rotation.eulerAngles.y;
+        SetActiveInputSystem();
     }
 
-    void CCSettings()
+    public void IsToInventoryCallBack(bool leftHand)
     {
-        if (_cc == null) throw new Exception($"character controller not found in NoneViveTestController");
-        _cc.radius = 0.4f;
-        _cc.height = 1.8f;
-        _cc.center = new Vector3(0, _cc.height / 2f, 0);
+        if(_interactible.GetInteractiveType()!=IteractibleType.PickUp) return; 
+        if (_interactible is not ItemPickUp item) return;
+        if(leftHand)_inventory.EqipToLeftHand(item.gameObject);
+        else _inventory.EqipToRightHand(item.gameObject);
     }
-
     private void Update()
     {
         InputRead();
         Move();
         if (_buttonHolding)_interactible?.Use();
     }
-
     private void LateUpdate()
     {
         Rotate();
     }
-
     private void FixedUpdate()
     {
         if (_VRControlImitation) ToMouseShoot();
         else CameraShoot();
     }
-
+    private void OnDisable()
+    {
+        (_inputSystem as IDisposable)?.Dispose();
+    }
     private void CameraShoot()
     {
         var ray = new Ray(_mCam.transform.position, _mCam.transform.forward);
         ShootTest(ray);
     }
-
     private void ToMouseShoot()
     {
-        var ray = _mCam.ScreenPointToRay(Input.mousePosition);
+        var ray = _mCam.ScreenPointToRay(_inputSystem.GetMousePosition());
         ShootTest(ray);
     }
-
     private void ShootTest(Ray ray)
     {
         _hitPos = null;
@@ -116,13 +125,12 @@ public class NoneViveTestController : MonoBehaviour, IPlayerControllerIniter, IU
     }
     private void Rotate()
     {
-        if (_mouseInput.sqrMagnitude < ZERO_FOR_INPUT) return;
-        _yaw = Clamper(_yaw + _mouseInput.x);
-        _pitch = Clamper(_pitch - _mouseInput.y, -Y_CAM_LIMIT, Y_CAM_LIMIT);
+        if (_inputSystem.GetMouseDelta() == Vector2.zero) return;
+        _yaw = Clamper(_yaw + _inputSystem.GetMouseDelta().x);
+        _pitch = Clamper(_pitch - _inputSystem.GetMouseDelta().y, -Y_CAM_LIMIT, Y_CAM_LIMIT);
         _playerRoot.rotation = Quaternion.Euler(0, _yaw, 0);
         _camHolder.localRotation = Quaternion.Euler(_pitch, 0, 0);
     }
-
     private float Clamper(float current, float min = 0, float max = 0)
     {
         if (min != 0 || max != 0) return Mathf.Clamp(current, min, max);
@@ -130,35 +138,35 @@ public class NoneViveTestController : MonoBehaviour, IPlayerControllerIniter, IU
         if (current < -360f) current += 360f;
         return current;
     }
-
     private void Move()
     {
-        if (_moveInput.sqrMagnitude < ZERO_FOR_INPUT)
+        if (_inputSystem.GetMoveInput()==Vector2.zero)
         {
             _cc.Move(Vector3.zero);
             return;
         }
-        _moveDir = _playerRoot.forward * _moveInput.y + _playerRoot.right * _moveInput.x;
-        _moveDir = _moveDir.normalized * Time.deltaTime;
-        _cc.Move(_moveDir * _moveSpeed);
+        _moveDir = _playerRoot.forward * _inputSystem.GetMoveInput().y + _playerRoot.right * _inputSystem.GetMoveInput().x;
+        _moveDir *= _moveSpeed;
+        _cc.Move(_moveDir*Time.deltaTime);
     }
-
     private void InputRead()
     {
-        _moveInput.Set(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
-        _mouseInput.Set(Input.GetAxis("Mouse X"), Input.GetAxis("Mouse Y"));
-        if (Input.GetKeyDown(KeyCode.E)) TryUseRight();
-        if (Input.GetKeyDown(KeyCode.Q)) TryUseLeft();
-        if (Input.GetKeyUp(KeyCode.E)) StopUse();
+        _inputSystem.InputUpdateType();
+        InputSignalIntepretator();
+    }
+    private void InputSignalIntepretator()
+    {
+        if (_inputSystem.GetRightTriggerPressed()) TryUseRight();
+        if (_inputSystem.GetLeftTriggerPressed()) TryUseLeft();
+        if (_inputSystem.GetLeftTriggerReleased()||_inputSystem.GetRightTriggerReleased()) StopUse();
         if (!_VRControlImitation && _itemController != null)
         {
-            if (Input.GetKeyDown(KeyCode.Mouse1)) _itemController.PowerStartHold();
-            if (Input.GetKeyUp(KeyCode.Mouse1)) _itemController.PowerStopHold();
-            if (Input.GetKeyDown(KeyCode.Mouse0)) _itemController.LeakStartHold();
-            if (Input.GetKeyUp(KeyCode.Mouse0)) _itemController.LeakStopHold();
+            if (_inputSystem.GetRightMouseButtonPressed()) _itemController.PowerStartHold();
+            if (_inputSystem.GetRightMouseButtonReleased()) _itemController.PowerStopHold();
+            if (_inputSystem.GetLeftMouseButtonPressed()) _itemController.LeakStartHold();
+            if (_inputSystem.GetLeftMouseButtonReleased()) _itemController.LeakStopHold();
         }
     }
-
     private void TryUseLeft()
     {
         if (_inventory != null)
@@ -167,6 +175,7 @@ public class NoneViveTestController : MonoBehaviour, IPlayerControllerIniter, IU
             if(_inventory.IfItemOnHand(isLeft:true)&&_inventory.HaveObject(isLeft:true)&&_hitPos!=null)_inventory.ReleasePropsObjTo(_hitPos.Value);
             if (_interactible == null) return;
             _interactible?.Use(this);
+            if (_interactible.GetInteractiveType() == IteractibleType.HoldButton) _buttonHolding = true;
         }
     }
     private void StopUse()
@@ -174,7 +183,6 @@ public class NoneViveTestController : MonoBehaviour, IPlayerControllerIniter, IU
         _buttonHolding = false; 
         (_interactible as RemoteButton)?.StopUse();
     }
-
     private void SetNewUseble(IInteractible useble)
     {
         if (_buttonHolding) StopUse();
@@ -183,22 +191,23 @@ public class NoneViveTestController : MonoBehaviour, IPlayerControllerIniter, IU
         if(_interactible==null)_contextHints.SetNewHint(null);
         else _contextHints.SetNewHint(_interactible.GetInteractiveType());
     }
-
     private void TryUseRight()
     {
         if (_interactible == null) return;
         _interactible.Use(this);
+        if(_interactible.GetInteractiveType() == IteractibleType.HoldButton)_buttonHolding=true;
     }
-
-    public void IsHoldCallback(bool set)
+    private void SetActiveInputSystem()
     {
-        _buttonHolding = set;
+        (_inputSystem as IDisposable)?.Dispose();
+        _inputSystem=_isNewInputSystem?new NewInputSystem():new OldInputSystem();
     }
-    public void IsToInventoryCallBack(bool leftHand)
+    private void CCSettings()
     {
-        if(_interactible.GetInteractiveType()!=IteractibleType.PickUp) return; 
-        if (_interactible is not ItemPickUp item) return;
-        if(leftHand)_inventory.EqipToLeftHand(item.gameObject);
-        else _inventory.EqipToRightHand(item.gameObject);
+        if (_cc == null) throw new Exception($"character controller not found in NoneViveTestController");
+        _cc.radius = 0.4f;
+        _cc.height = 1.8f;
+        _cc.center = new Vector3(0, _cc.height / 2f, 0);
     }
+  
 }

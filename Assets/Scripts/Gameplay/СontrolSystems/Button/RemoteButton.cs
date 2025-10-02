@@ -30,7 +30,6 @@ public class RemoteButton : MonoBehaviour,IUseble
       }
       if (ButtonType == ButtonState.Hold)
       {
-         useCallBack?.IsHoldCallback(true);
          IsActive = true;
          OnUsed?.Invoke(this);
       }

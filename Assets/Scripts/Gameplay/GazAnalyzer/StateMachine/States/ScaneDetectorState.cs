@@ -36,9 +36,7 @@ namespace Gameplay.GazAnalyzer.StateMachine.States
             Vector3 directionToTarget = target.position - _indicatorArrow.position;
             // float angleX = -Mathf.Atan2(directionToTarget.y, Mathf.Sqrt(directionToTarget.x * directionToTarget.x + directionToTarget.z * directionToTarget.z)) * Mathf.Rad2Deg;
             // float angleY = Mathf.Atan2(directionToTarget.x, directionToTarget.z) * Mathf.Rad2Deg;
-            directionToTarget.x = directionToTarget.x;
-            directionToTarget.y=  directionToTarget.y;
-            directionToTarget.z = directionToTarget.z;
+         
             _indicatorArrow.rotation = Quaternion.LookRotation(directionToTarget);
         }
         
