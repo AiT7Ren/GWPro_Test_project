@@ -4,7 +4,7 @@ using UnityEngine;
 public class СontextHints : MonoBehaviour
 {
     [SerializeField]private TextMeshProUGUI _text;
-    [SerializeField]private СontextHintsData _hintsDate;
+    [SerializeField]private СontextHintsDate _hintsDate;
     
     public void SetNewHint(IteractibleType? key)
     {

@@ -14,8 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hits:
   - type: 0
-    description: Press E to Use
+    description: "Press <color=blue>Q</color> or <color=red>E</color>\n to Use"
   - type: 1
-    description: Hold E to Use
+    description: 'Hold <color=blue>Q</color> or <color=red>E</color>
+
+      to Use'
   - type: 2
-    description: Press E to PIckUp
+    description: "Press <color=blue>Q</color> or <color=red>E</color>\n to PIckUp"

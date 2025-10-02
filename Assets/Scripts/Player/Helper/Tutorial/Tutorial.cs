@@ -8,8 +8,9 @@ public class Tutorial : MonoBehaviour
 {
     [SerializeField] private GameObject _arrowPreFab;
     [SerializeField]private bool _isComplited=false;
-    private GameObject _arrow;
     [SerializeField] private TextMeshProUGUI _tuturialText;
+    [SerializeField] private TutorialDate _stepDescriptionDate;
+    private GameObject _arrow;
     #region Class TutorialStep
     [System.Serializable]
     public class TutorialStep
@@ -91,36 +92,29 @@ public class Tutorial : MonoBehaviour
     
     private void Init()
     {
-       
-        TutorialSteps[0].WhatNeewToDo = "PICK UP \n GazAnatyzator \n (RTrigger for VR / E for Keyboard)";
-        TutorialSteps[0].OnEnter= () =>
-        {
-            ArrowTo(TutorialSteps[0].StepHelpObject);
-         //   TextUpdate();
-        };
-        TutorialSteps[1].WhatNeewToDo = "PICK UP \n Sensor \n (LTrigger for VR / Q for Keyboard)";
+        
+        TutorialSteps[0].OnEnter= () => ArrowTo(TutorialSteps[0].StepHelpObject);
         TutorialSteps[1].OnEnter= () => ArrowTo(TutorialSteps[1].StepHelpObject);
-        TutorialSteps[2].WhatNeewToDo = "PowerOn GazAnatyzator \n (HoldButton(AnyTrigger) for VR / Hold M1 for Keyboard/HoldButton E for KeyboardVRSimilar)";
         TutorialSteps[2].OnEnter = () => ButtonTutorial(TutorialSteps[2].StepHelpObject);
-        TutorialSteps[3].WhatNeewToDo = "Move to the Danger Zone";
         TutorialSteps[3].OnEnter = TextUpdate;
-        TutorialSteps[4].WhatNeewToDo = "PowerOn Seansor \n (HoldButton(AnyTrigger) for VR / Hold M0 for Keyboard/HoldButton E for KeyboardVRSimilar)";
         TutorialSteps[4].OnEnter = () => ButtonTutorial(TutorialSteps[4].StepHelpObject);
-        TutorialSteps[5].WhatNeewToDo = "Attach Sensor to Pipe \n (LTrigger) for VR / Q for Keyboard";
         TutorialSteps[5].OnEnter =()=> ButtonTutorial(TutorialSteps[5].StepHelpObject);
-        TutorialSteps[6].WhatNeewToDo = "Return Sensor to Hand \n (LTrigger) for VR / Q for Keyboard";
         TutorialSteps[6].OnEnter = TextUpdate;
-        TutorialSteps[7].WhatNeewToDo = "Power Off Sensor \n (HoldButton(AnyTrigger) for VR / Hold M0 for Keyboard/HoldButton E for KeyboardVRSimilar)";
         TutorialSteps[7].OnEnter = () => ButtonTutorial(TutorialSteps[7].StepHelpObject);
-        TutorialSteps[8].WhatNeewToDo = "Get out from the Danger Zone";
         TutorialSteps[8].OnEnter = TextUpdate;
         
         _arrow = Instantiate(_arrowPreFab);
 
         foreach (var step in TutorialSteps)
         {
-            if (step.StepHelpObject != null) step.OnExit = () => OffToTransform(step.StepHelpObject);
-            else step.OnExit =()=> OffToTransform(null);
+            step.OnExit=(step.StepHelpObject != null)
+                ? () => OffToTransform(step.StepHelpObject)
+                : () => OffToTransform(null);
+        }
+
+        for (int i = 0; i < TutorialSteps.Count; i++)
+        {
+            TutorialSteps[i].WhatNeewToDo = _stepDescriptionDate.tutorialStep[i];
         }
         GoToNewState();
     }

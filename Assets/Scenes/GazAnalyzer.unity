@@ -1563,6 +1563,7 @@ MonoBehaviour:
   _arrowPreFab: {fileID: 5264121324423915897, guid: 805413e4cfb9b544bb3857536311fd5d, type: 3}
   _isComplited: 0
   _tuturialText: {fileID: 1410559034}
+  _stepDescriptionDate: {fileID: 11400000, guid: 5f680a991d93c574b9300e39cd508a35, type: 2}
   TutorialSteps:
   - active: 0
     WhatNeewToDo: 
@@ -3395,17 +3396,101 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayarMainController
       objectReference: {fileID: 0}
+    - target: {fileID: 2633838001712600918, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2633838001712600918, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2633838001712600918, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2633838001712600918, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_AnchorMin.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2633838001712600918, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_SizeDelta.x
+      value: -1720
+      objectReference: {fileID: 0}
+    - target: {fileID: 2633838001712600918, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: -1030
+      objectReference: {fileID: 0}
     - target: {fileID: 2819518899189180821, guid: c1539f38d115f014a869680a07372a9b, type: 3}
       propertyPath: m_text
       value: 
       objectReference: {fileID: 0}
     - target: {fileID: 2819518899189180821, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_fontSize
+      value: 36
+      objectReference: {fileID: 0}
+    - target: {fileID: 2819518899189180821, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_fontAsset
+      value: 
+      objectReference: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+    - target: {fileID: 2819518899189180821, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_fontStyle
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2819518899189180821, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_StyleSheet
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 2819518899189180821, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_spriteAsset
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 2819518899189180821, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2819518899189180821, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_sharedMaterial
+      value: 
+      objectReference: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+    - target: {fileID: 2819518899189180821, guid: c1539f38d115f014a869680a07372a9b, type: 3}
       propertyPath: m_VerticalAlignment
       value: 512
       objectReference: {fileID: 0}
     - target: {fileID: 2819518899189180821, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: checkPaddingRequired
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2819518899189180821, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_enableExtraPadding
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2819518899189180821, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_overrideHtmlColors
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2819518899189180821, guid: c1539f38d115f014a869680a07372a9b, type: 3}
       propertyPath: m_HorizontalAlignment
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2819518899189180821, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_hasFontAssetChanged
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2819518899189180821, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_geometrySortingOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2819518899189180821, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_IsTextObjectScaleStatic
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4269606058136389725, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_fontStyle
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4269606058136389725, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4269606058136389725, guid: c1539f38d115f014a869680a07372a9b, type: 3}
       propertyPath: m_VerticalAlignment
@@ -3511,6 +3596,14 @@ PrefabInstance:
       propertyPath: _noneVrPlayerController
       value: 
       objectReference: {fileID: 3490746450115880870, guid: c05f9bccc4d9541498e67f5453c99f21, type: 3}
+    - target: {fileID: 6032620821446440568, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8867844427520192391, guid: c1539f38d115f014a869680a07372a9b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

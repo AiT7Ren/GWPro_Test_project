@@ -367,7 +367,7 @@ GameObject:
   - component: {fileID: 3048516620374680049}
   - component: {fileID: 2819518899189180821}
   m_Layer: 5
-  m_Name: ContectHit
+  m_Name: ContectHintText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -532,7 +532,7 @@ GameObject:
   - component: {fileID: 1949579523765989454}
   - component: {fileID: 4269606058136389725}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: TutorialText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 979512944d944990a4805929775f8d05, type: 3}
+  m_Name: TutorialDate
+  m_EditorClassIdentifier: 
+  tutorialStep:
+  - Pick Up <color=red>Gaz Analyzator</color>
+  - Pick Up <color=red>Sensor</color>
+  - Power On <color=red>Gaz Analyzator</color>
+  - Move to <color=red>Danger Zone</color>
+  - Power On <color=red>Sensor</color>
+  - 'Attach <color=red>Sensor to Pioe</color>
+
+    <color=red>Press Q</color>'
+  - 'Return <color=red>Sensor to Hand</color>
+
+    <color=red>Press Q</color>'
+  - Power Off<color=red>Sensor</color>
+  - Get out from <color=red>Danger Zone</color>

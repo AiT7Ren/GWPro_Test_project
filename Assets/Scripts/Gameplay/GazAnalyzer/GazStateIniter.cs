@@ -58,7 +58,7 @@ public class GazStateIniter : MonoBehaviour
 
     private IDangerZoneHolder TakeStaticZoneHolder()
     {
-        Debug.Log("Try Take Static Danger Zone");
+      //  Debug.Log("Try Take Static Danger Zone");
         if (DangerZoneHolder.Instance != null) return DangerZoneHolder.Instance;
         throw new System.NullReferenceException("No DangerZoneHolder found in scene");
     }
