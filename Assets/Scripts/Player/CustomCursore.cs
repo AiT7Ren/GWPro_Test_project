@@ -9,6 +9,9 @@ public class CustomCursore:IDisposable
     public CustomCursore(Texture2D cursorTexture)
     {
         _cursorTexture = cursorTexture;
+        _hotSpot = new Vector2(
+            cursorTexture.width * 0.5f,
+            cursorTexture.height * 0.5f);
         SetCustomCursore();
     }
     private void SetCustomCursore()

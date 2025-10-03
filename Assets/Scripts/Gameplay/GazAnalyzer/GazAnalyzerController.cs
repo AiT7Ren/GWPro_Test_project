@@ -14,7 +14,7 @@ public class GazAnalyzerController : MonoBehaviour
   public StringUnityEvent OnScaneState;
   public StringUnityEvent OnLeakFindState;
   
-  [SerializeField] private Image _powerChangeIndicator;
+  [SerializeField] private  HoldIndicator _powerChangeIndicator;
   [SerializeField]GazStateIniter _gazAnalyzIniter;
   private float _currentHoldAnalizator;
   private float _currentHoldProbs;
@@ -178,7 +178,7 @@ public class GazAnalyzerController : MonoBehaviour
       return;
     }
     _powerChangeIndicator.gameObject.SetActive(true);
-    _powerChangeIndicator.fillAmount = _currentHoldAnalizator / HOLDER_TO_POWER;
+    _powerChangeIndicator.SetAmount(_currentHoldAnalizator / HOLDER_TO_POWER);
   }
 
   private void ButtonControllSub()

@@ -7,7 +7,7 @@ public class ProbsHolder : MonoBehaviour
     //тут связь специально сделал с помощью UnityEvent
     public UnityEvent<bool> OnProbsOnActive;
     [SerializeField] private Transform[] _localTransform;
-    [SerializeField] private Image _powerImage; 
+    [SerializeField] private HoldIndicator _powerImage; 
     private bool _isActive;
     [field:SerializeField,Range(1f,360f)] float _rotateSpeed;
     public void TryPower(float amount)
@@ -19,7 +19,7 @@ public class ProbsHolder : MonoBehaviour
             _powerImage.gameObject.SetActive(false);
             return;
         }
-        _powerImage.fillAmount = amount;
+        _powerImage.SetAmount(amount);
     }
     private void SetActiveRotate()
     {
