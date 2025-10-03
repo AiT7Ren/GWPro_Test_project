@@ -160,11 +160,14 @@ public class NoneViveTestController : MonoBehaviour, IPlayerControllerIniter, IU
         if (_inputSystem.GetLeftTriggerPressed()) TryUseLeft();
         if (_inputSystem.GetLeftTriggerReleased()||_inputSystem.GetRightTriggerReleased()) StopUse();
         if (!_VRControlImitation && _itemController != null)
-        {
-            if (_inputSystem.GetRightMouseButtonPressed()) _itemController.PowerStartHold();
-            if (_inputSystem.GetRightMouseButtonReleased()) _itemController.PowerStopHold();
-            if (_inputSystem.GetLeftMouseButtonPressed()) _itemController.LeakStartHold();
-            if (_inputSystem.GetLeftMouseButtonReleased()) _itemController.LeakStopHold();
+        { 
+            Debug.LogWarning("This controller now not available");
+            //<= отключу, данный способ совсем не подходит под задумку
+            //что бы он работал мне в инвентаре нужно получить кнопку, но сейчас это не имеет особого смысла 
+          //  if (_inputSystem.GetRightMouseButtonPressed()) _itemController.PowerStartHold();
+          //  if (_inputSystem.GetRightMouseButtonReleased()) _itemController.PowerStopHold();
+          //  if (_inputSystem.GetLeftMouseButtonPressed()) _itemController.LeakStartHold();
+          //  if (_inputSystem.GetLeftMouseButtonReleased()) _itemController.LeakStopHold();
         }
     }
     private void TryUseLeft()

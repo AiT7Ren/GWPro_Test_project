@@ -10,6 +10,7 @@ public class PowerState : IGazState
     private float _duration;
     private bool _isActive;
     private float _emissionIntensity;
+    private Coroutine _displayChange;
     public PowerState(Material material, Color color, float duration, bool on,float emissionIntensity=0f)
     {
         _material = material;
@@ -22,12 +23,12 @@ public class PowerState : IGazState
 
     public void Enter()
     {
-        _coroutineHolder.StartCoroutine(LerpColorOverTime(_material.color, _color, _duration));
+        _displayChange =_coroutineHolder.StartCoroutine(LerpColorOverTime(_material.color, _color, _duration));
     }
 
     public void Exit()
     {
-        _coroutineHolder.StopAllCoroutines();
+        _coroutineHolder.StopCoroutine(_displayChange);
         _material.color = _color;
         BackLight(_isActive);
     }

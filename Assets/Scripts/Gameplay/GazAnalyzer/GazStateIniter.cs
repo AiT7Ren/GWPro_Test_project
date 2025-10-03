@@ -5,6 +5,9 @@ using UnityEngine.UI;
 
 public class GazStateIniter : MonoBehaviour
 {
+    private const float HOLDER_TO_POWER=3f;
+    private const float HOLDER_TO_LEAK=0.5f;
+    
     [SerializeField] private MonoBehaviour _perhapsDangerZoneHolder;
     [Header("Display Settings")]
     [SerializeField] private Transform _display;
@@ -23,9 +26,10 @@ public class GazStateIniter : MonoBehaviour
     [SerializeField] private Transform _airCollector;
     [SerializeField] private Image _leakIndiator;
     [Header("Mouse or VR Buttons")]
-    [SerializeField] private RemoteButton _poweronButton;
+    [SerializeField] private RemoteButton _powerButton;
     [SerializeField] private RemoteButton _leakerButton;
-    
+    [SerializeField] private HoldIndicator _powerChangeIndicator;
+    [SerializeField] private HoldIndicator _leakChangeIndicator;
     
     private IGazAnalyzStateMachine _stateMachine;
     private Material _hashDisplayMaterial;
@@ -46,19 +50,18 @@ public class GazStateIniter : MonoBehaviour
         return TakeStaticZoneHolder();
     }
 
-    public RemoteButton GetPowerOnButton()
+    public IHoldButton GetPowerOnButton()
     {
-        return _poweronButton;
+        return new HoldButtonController(HOLDER_TO_POWER, _powerChangeIndicator, _powerButton);
     }
 
-    public RemoteButton GetLeakDetectionButton()
+    public IHoldButton GetLeakDetectionButton()
     {
-        return _leakerButton;
+        return new HoldButtonController(HOLDER_TO_LEAK, _leakChangeIndicator, _leakerButton);
     }
 
     private IDangerZoneHolder TakeStaticZoneHolder()
     {
-      //  Debug.Log("Try Take Static Danger Zone");
         if (DangerZoneHolder.Instance != null) return DangerZoneHolder.Instance;
         throw new System.NullReferenceException("No DangerZoneHolder found in scene");
     }

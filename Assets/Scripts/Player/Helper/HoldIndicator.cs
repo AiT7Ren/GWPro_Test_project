@@ -1,9 +1,10 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class HoldIndicator : MonoBehaviour
 {
-    [Range(0, 1)] public float HoldPower;
+   // [Range(0, 1)] public float HoldPower;
     [SerializeField]private Image _holdIndicator;
     [SerializeField]private Transform _objectToHold;
     [SerializeField] private float _startAngle = 0f;
@@ -13,6 +14,8 @@ public class HoldIndicator : MonoBehaviour
     [SerializeField] private Color _startColor;
     [SerializeField] private Color _endColor;
     [SerializeField] private Image[] _imageToColorCange;
+
+   
 
     private void Start()
     {
@@ -38,9 +41,9 @@ public class HoldIndicator : MonoBehaviour
         }
     }
 #if UNITY_EDITOR
-    private void OnValidate()
-    {
-       SetAmount(HoldPower);
-    }
+    // private void OnValidate()
+    // {
+    //  //  SetAmount(HoldPower);
+    // }
 #endif
 }
