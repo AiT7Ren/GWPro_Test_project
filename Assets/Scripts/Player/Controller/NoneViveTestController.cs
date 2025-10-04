@@ -25,8 +25,6 @@ public class NoneViveTestController : MonoBehaviour, IPlayerControllerIniter, IU
     
     [SerializeField] private LayerMask _mask;
     [SerializeField] private float _rayDistance = 2.5f;
-    
-    [SerializeField] private GazAnalyzerController _itemController;
     [SerializeField] private Inventory _inventory;
     
     private СontextHints _contextHints;
@@ -159,15 +157,12 @@ public class NoneViveTestController : MonoBehaviour, IPlayerControllerIniter, IU
         if (_inputSystem.GetRightTriggerPressed()) TryUseRight();
         if (_inputSystem.GetLeftTriggerPressed()) TryUseLeft();
         if (_inputSystem.GetLeftTriggerReleased()||_inputSystem.GetRightTriggerReleased()) StopUse();
-        if (!_VRControlImitation && _itemController != null)
+        if (!_VRControlImitation && _inventory != null)
         { 
-            Debug.LogWarning("This controller now not available");
-            //<= отключу, данный способ совсем не подходит под задумку
-            //что бы он работал мне в инвентаре нужно получить кнопку, но сейчас это не имеет особого смысла 
-          //  if (_inputSystem.GetRightMouseButtonPressed()) _itemController.PowerStartHold();
-          //  if (_inputSystem.GetRightMouseButtonReleased()) _itemController.PowerStopHold();
-          //  if (_inputSystem.GetLeftMouseButtonPressed()) _itemController.LeakStartHold();
-          //  if (_inputSystem.GetLeftMouseButtonReleased()) _itemController.LeakStopHold();
+            if (_inputSystem.GetRightMouseButtonPressed()) _inventory.SetPowerActive(true);
+            if (_inputSystem.GetRightMouseButtonReleased()) _inventory.SetPowerActive(false);
+            if (_inputSystem.GetLeftMouseButtonPressed()) _inventory.SetLeakActive(true);
+            if (_inputSystem.GetLeftMouseButtonReleased()) _inventory.SetLeakActive(false);
         }
     }
     private void TryUseLeft()

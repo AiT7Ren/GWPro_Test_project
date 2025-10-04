@@ -13,6 +13,24 @@ public class Inventory : MonoBehaviour
     [SerializeField]private GameObject ItemFromLeftHand;
     [SerializeField] private Transform _wire;
     public bool IsProbsPlace = false;
+    [SerializeField] private RemoteButton _onPowerButton;
+    [SerializeField] private RemoteButton _onLeakButton;
+
+
+    public void SetPowerActive(bool active)
+    {
+        Debug.Log($"TRY POWER: {active}");
+      //  if(!IfItemOnHand(false)) return;
+        if(active)_onPowerButton.Use();
+        else _onPowerButton.StopUse();
+    }
+    public void SetLeakActive(bool active)
+    {
+        Debug.Log($"TRY LEAK: {active}");
+       // if(!IfItemOnHand(false)) return;
+        if(active)_onLeakButton.Use();
+        else _onLeakButton.StopUse();
+    }
     
     public bool IfItemOnHand(bool isLeft)
     {

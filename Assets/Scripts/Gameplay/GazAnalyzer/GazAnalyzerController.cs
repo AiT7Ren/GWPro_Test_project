@@ -14,7 +14,7 @@ public class GazAnalyzerController : MonoBehaviour
   
   [SerializeField] private GazStateIniter _gazAnalyzIniter;
   
-  private GazStateManager _stateManager;
+  private IGazStateManager _stateManager;
   private IGazAnalyzStateMachine _stateMachine;
   
   private bool _isInDanger;

@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using System.Threading;
+using System.Threading.Tasks;
 using Helpers;
 using UnityEngine;
 
@@ -19,7 +21,8 @@ public class GazStateManager : IGazStateManager,IDisposable
     private readonly CoroutineHolder _coroutineHolder;
     private bool _isActive=false;
     private float _duration;
-    private Coroutine _delayCoroutine;
+    private CancellationTokenSource _currentCts;
+    private bool _isProcessing = false;
     public GazStateManager( IGazAnalyzStateMachine stateMachine,
         StringUnityEvent onOffState, StringUnityEvent onOnState,
         StringUnityEvent onDangerState, StringUnityEvent onScaneState,
@@ -32,29 +35,36 @@ public class GazStateManager : IGazStateManager,IDisposable
         _onScaneState = onScaneState;
         _onLeakFindState = onLeakFindState;
         _duration=duration;
-        _coroutineHolder=CoroutineHolder.Instance;
+        
     }
-    private IEnumerator DelayPowerChange(GazAnalyzerState gazState,bool isActive)
+    private async Task DelayPowerChangeAndResetAsync(GazAnalyzerState state)
     {
-        yield return new WaitForSeconds(_duration);
-        _isActive=isActive;
-        _delayCoroutine = null;
-        TryChangeState(gazState);
-
+        _isActive = !_isActive;
+        _currentCts?.Cancel();
+        _currentCts = new CancellationTokenSource();
+        try
+        {
+            await Task.Delay(TimeSpan.FromSeconds(_duration),_currentCts.Token);
+            _isProcessing = false;
+            TryChangeState(state);
+        }
+        catch (TaskCanceledException)
+        {
+            _isProcessing = false;
+        }
     }
+    
     public void TryChangeState(GazAnalyzerState state)
     {
-        
-        if (!state.IsPowerOn)
+        if(_isProcessing)return;
+        if (!state.IsPowerOn&&_isActive)
         {
-            InvokeState(_onOffState, GazStateName.OFF_STATE);
-            if(_delayCoroutine==null)_delayCoroutine = _coroutineHolder.StartCoroutine(DelayPowerChange(state,false));
+            ChangeStateAndDelay(_onOffState, GazStateName.OFF_STATE,state);
             return;
         }
         if (state.IsPowerOn&&!_isActive)
         {
-            InvokeState(_onOnState, GazStateName.ON_STATE);
-            if(_delayCoroutine==null)_delayCoroutine = _coroutineHolder.StartCoroutine(DelayPowerChange(state,true));
+            ChangeStateAndDelay(_onOnState, GazStateName.ON_STATE,state);
             return;
         }
         if(!_isActive)return;
@@ -71,6 +81,13 @@ public class GazStateManager : IGazStateManager,IDisposable
         InvokeState(_onScaneState, GazStateName.SCANE_STATE);
     }
 
+    private void ChangeStateAndDelay(StringUnityEvent onOffState,string stateName,GazAnalyzerState state)
+    {
+        _isProcessing=true;
+        InvokeState(onOffState, stateName);
+        _ = DelayPowerChangeAndResetAsync(state);
+    }
+    
     private void InvokeState(StringUnityEvent eventMethod, string stateName)
     {
         if (eventMethod?.GetPersistentEventCount() > 0)
@@ -85,8 +102,9 @@ public class GazStateManager : IGazStateManager,IDisposable
     }
     public void Dispose()
     {
-        if(_delayCoroutine!=null)_coroutineHolder.StopCoroutine(_delayCoroutine);
-        _delayCoroutine=null;
+        _currentCts?.Cancel();
+        _currentCts?.Dispose();
+        _currentCts = null;
     }
 }
 

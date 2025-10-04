@@ -4,13 +4,13 @@ using Helpers;
 
 public class PowerState : IGazState
 {
-    CoroutineHolder _coroutineHolder;
-    private Material _material;
-    private Color _color;
-    private float _duration;
-    private bool _isActive;
-    private float _emissionIntensity;
-    private Coroutine _displayChange;
+    private readonly Material _material;
+    private readonly Color _color;
+    private Color _originalColor;
+    private readonly float _duration;
+    private readonly bool _isActive;
+    private readonly float _emissionIntensity;
+    private float _elapsedTime;
     public PowerState(Material material, Color color, float duration, bool on,float emissionIntensity=0f)
     {
         _material = material;
@@ -18,39 +18,28 @@ public class PowerState : IGazState
         _duration = duration;
         _isActive = on;
         _emissionIntensity = emissionIntensity;
-        _coroutineHolder=CoroutineHolder.Instance;
     }
 
     public void Enter()
     {
-        _displayChange =_coroutineHolder.StartCoroutine(LerpColorOverTime(_material.color, _color, _duration));
+        _elapsedTime = 0f;
+        _originalColor=_material.color;
     }
 
     public void Exit()
     {
-        _coroutineHolder.StopCoroutine(_displayChange);
         _material.color = _color;
         BackLight(_isActive);
     }
-
     public void Update(float deltaTime, Transform transform = null)
     {
-
-    }
-
-    private IEnumerator LerpColorOverTime(Color from, Color to, float duration)
-    {
-        var elapsedTime = 0f;
-        while (elapsedTime < duration)
+        _elapsedTime += deltaTime;
+        if (_elapsedTime >= _duration)
         {
-            elapsedTime += Time.deltaTime;
-            var t = elapsedTime / duration;
-            t = Mathf.SmoothStep(0f, 1f, t);
-            var currentColor = Color.Lerp(from, to, t);
-            _material.color = currentColor;
-            yield return null;
+            Exit();
+            return;
         }
-        Exit();
+        _material.color = Color.Lerp(_originalColor, _color, _elapsedTime / _duration);
     }
     private void BackLight(bool active)
     {
